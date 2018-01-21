@@ -1,0 +1,83 @@
+#!/bin/bash
+clear
+echo "------------------------------------------"
+echo "Getting Current CPU Dual CORE Frequency"
+## Current Speeds.
+freq1=$(cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq)
+freq2=$(cat /sys/devices/system/cpu/cpu1/cpufreq/cpuinfo_cur_freq)
+## Max Speeds.
+freq3=$(cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq)
+freq4=$(cat /sys/devices/system/cpu/cpu1/cpufreq/cpuinfo_max_freq)
+## Min Speeds.
+freq5=$(cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq)
+freq6=$(cat /sys/devices/system/cpu/cpu1/cpufreq/cpuinfo_min_freq)
+## Available Scaling
+sfreq1=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies)
+sfreq2=$(cat /sys/devices/system/cpu/cpu1/cpufreq/scaling_available_frequencies)
+sleep 0.5
+echo "Freqiencies Obtained"
+echo "------------------------------------------"
+echo "CORE1_CURRENT_SPEED= "$freq1" Mhz"
+echo "CORE2_CURRENT_SPEED= "$freq2" Mhz"
+echo "------------------------------------------"
+echo "CORE1_MAX_SPEED= "$freq3" Mhz"
+echo "CORE2_MAX_SPEED= "$freq4" Mhz"
+echo "------------------------------------------"
+echo "CORE1_MIN_SPEED= "$freq5" Mhz"
+echo "CORE2_MIN_SPEED= "$freq6" Mhz"
+echo "------------------------------------------"
+echo "Listing Available Scalable Frequency for CORE 0"
+echo ""
+sleep 0.5
+x1=$( echo $sfreq1 | awk {'print $1'} )
+x2=$( echo $sfreq1 | awk {'print $2'} )
+x3=$( echo $sfreq1 | awk {'print $3'} )
+echo "Speed 1: "$x1" Mhz"
+echo "Speed 2: "$x2" Mhz"
+echo "Speed 3: "$x3" Mhz"
+echo ""
+echo "Listing Available Scalable Frequency for CORE 1"
+echo ""
+y1=$( echo $sfreq2 | awk {'print $1'} )
+y2=$( echo $sfreq2 | awk {'print $2'} )
+y3=$( echo $sfreq2 | awk {'print $3'} )
+echo "Speed 1: "$y1" Mhz"
+echo "Speed 2: "$y2" Mhz"
+echo "Speed 3: "$y3" Mhz"
+sleep 0.2
+echo "------------------------------------------"
+echo "Setting Processor to Highest Available Setting."
+echo "Setting CPU 0 Core Speed to...."
+newSpeedTopCORE0=$x1
+newSpeedTopCORE1=$y1
+newSpeedLowCORE0=$newSpeedTopCORE0
+newSpeedLowCORE1=$newSpeedTopCORE1
+echo "Speed: "$newSpeedLowCORE0" Mhz"
+echo "Setting CPU 1 Core Speed to...."
+echo "Speed: "$newSpeedLowCORE1" Mhz"
+cd /sys/devices/system/cpu
+echo "------------------------------------------"
+for c in ./cpu0; do
+echo "Setting New Top Core 0 Speed."
+echo $newSpeedTopCORE0 >${c}/cpufreq/scaling_max_freq
+echo "Setting New Low Core 0 Speed."
+echo $newSpeedLowCORE0 >${c}/cpufreq/scaling_min_freq
+done
+sleep 0.2
+echo "-------------------------------------------"
+for c in ./cpu1; do
+echo "Setting New Top Core 1 Speed."
+echo $newSpeedTopCORE1 > ${c}/cpufreq/scaling_max_freq
+echo "Setting New Low Core 1 Speed."
+echo $newSpeedLowCORE1 > ${c}/cpufreq/scaling_min_freq
+done
+sleep 0.2
+echo "------------------------------------------"
+echo "Current Processor Speeds are now set as: "
+echo "Processor Core 0: "$freq1" Mhz"
+echo "Processor Core 1: "$freq2" Mhz"
+echo "-------------------------------------------"
+echo "Listing CPU Information:"
+echo ""
+/var/cpumon/listcpu
+sleep 1
